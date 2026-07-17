@@ -1420,6 +1420,19 @@ body::before {
     box-shadow: 0 0 0 2px rgba(57, 210, 192, 0.1);
 }
 
+.form-input.input-invalid,
+.form-select.input-invalid,
+.form-textarea.input-invalid {
+    border-color: var(--accent-red);
+}
+
+.form-input.input-invalid:focus,
+.form-select.input-invalid:focus,
+.form-textarea.input-invalid:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 0 2px rgba(248, 81, 73, 0.12);
+}
+
 .form-input::placeholder,
 .form-textarea::placeholder {
     color: var(--text-muted);

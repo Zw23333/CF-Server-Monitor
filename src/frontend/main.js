@@ -28,18 +28,36 @@ async function fetchConfig() {
   try {
     const result = await http.get('/api/config', { includeAuth: true, includeTurnstile: true })
     if (result.error) {
-      return { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', version: '', verified: false }
+      return {
+        turnstile_enabled: false,
+        turnstile_login_enabled: false,
+        turnstile_site_key: '',
+        version: '',
+        last_workers_version: '',
+        last_agent_version: '',
+        verified: false
+      }
     }
 
     const data = result.data
     if (!data) {
-      return { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', version: '', verified: false }
+      return {
+        turnstile_enabled: false,
+        turnstile_login_enabled: false,
+        turnstile_site_key: '',
+        version: '',
+        last_workers_version: '',
+        last_agent_version: '',
+        verified: false
+      }
     }
 
     const turnstileEnabled = isTurnstileValueEnabled(data.turnstile_enabled)
     const turnstileLoginEnabled = isTurnstileValueEnabled(data.turnstile_login_enabled)
     const turnstileSiteKey = data.turnstile_site_key || ''
     const version = data.version || ''
+    const lastWorkersVersion = data.last_workers_version || ''
+    const lastAgentVersion = data.last_agent_version || ''
     const verified = data.verified === true
     const isPublic = data.is_public !== false
     const authorization = data.authorization === true
@@ -56,6 +74,8 @@ async function fetchConfig() {
       turnstile_login_enabled: turnstileLoginEnabled,
       turnstile_site_key: turnstileSiteKey,
       version,
+      last_workers_version: lastWorkersVersion,
+      last_agent_version: lastAgentVersion,
       verified,
       is_public: isPublic,
       authorization,
@@ -66,7 +86,15 @@ async function fetchConfig() {
   } catch (e) {
     console.error('Failed to fetch config:', e)
   }
-  return { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', verified: false }
+  return {
+    turnstile_enabled: false,
+    turnstile_login_enabled: false,
+    turnstile_site_key: '',
+    version: '',
+    last_workers_version: '',
+    last_agent_version: '',
+    verified: false
+  }
 }
 
 async function verifyTurnstileByIndex(siteKey, apiIndex = 0) {
@@ -200,13 +228,15 @@ async function initApp() {
         turnstile_site_key: sharedTurnstileSite?.siteKey || first.data.turnstile_site_key || '',
         turnstile_api_index: sharedTurnstileSite?.index || 0,
         version: first.data.version || '',
+        last_workers_version: first.data.last_workers_version || '',
+        last_agent_version: first.data.last_agent_version || '',
         verified: sharedTurnstileSite ? enabledTurnstileSites.every(site => site.verified) : first.data.verified === true,
         is_public: !privateAccess.hasPrivateSite,
         authorization: !privateAccess.hasUnauthorizedPrivateSite,
         site_title: first.data.site_title || '',
         csp_static: first.data.csp_static || '',
         csp_api: first.data.csp_api || ''
-      } : { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', turnstile_api_index: 0, version: '', verified: false, is_public: true, authorization: false, site_title: '', csp_static: '', csp_api: '' }
+      } : { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', turnstile_api_index: 0, version: '', last_workers_version: '', last_agent_version: '', verified: false, is_public: true, authorization: false, site_title: '', csp_static: '', csp_api: '' }
       if (sharedTurnstileSite) {
         config.turnstile_enabled = true
         config.turnstile_site_key = sharedTurnstileSite.siteKey
@@ -214,7 +244,7 @@ async function initApp() {
       }
       if (config.version) VERSION.value = config.version
     } catch (_) {
-      config = { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', turnstile_api_index: 0, version: '', verified: false, is_public: true, authorization: false, csp_static: '', csp_api: '' }
+      config = { turnstile_enabled: false, turnstile_login_enabled: false, turnstile_site_key: '', turnstile_api_index: 0, version: '', last_workers_version: '', last_agent_version: '', verified: false, is_public: true, authorization: false, csp_static: '', csp_api: '' }
     }
   } else {
     config = await fetchConfig()
